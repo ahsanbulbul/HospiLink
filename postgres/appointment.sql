@@ -678,3 +678,40 @@ BEGIN
     END IF;
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION public.show_upcoming_appointments(p_username character varying, p_user_type character varying)
+ RETURNS TABLE(appointment_id integer, appointment_date date, appointment_time time without time zone, with_user character varying)
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+    IF p_user_type = 'doctor' THEN
+        RETURN QUERY
+        SELECT 
+            a.appointment_id,
+            a.appointment_date,
+            a.appointment_time,
+            a.patient_username AS with_user
+        FROM appointments a
+        WHERE a.doctor_username = p_username
+          AND (a.appointment_date > CURRENT_DATE 
+               OR (a.appointment_date = CURRENT_DATE AND a.appointment_time >= CURRENT_TIME))
+        ORDER BY a.appointment_date, a.appointment_time;
+    ELSIF p_user_type = 'patient' THEN
+        RETURN QUERY
+        SELECT 
+            a.appointment_id,
+            a.appointment_date,
+            a.appointment_time,
+            a.doctor_username AS with_user
+        FROM appointments a
+        WHERE a.patient_username = p_username
+          AND (a.appointment_date > CURRENT_DATE 
+               OR (a.appointment_date = CURRENT_DATE AND a.appointment_time >= CURRENT_TIME))
+        ORDER BY a.appointment_date, a.appointment_time;
+    ELSE
+        RAISE EXCEPTION 'Invalid user type: %. Expected ''doctor'' or ''patient''.', p_user_type;
+    END IF;
+END;
+$function$
+;
