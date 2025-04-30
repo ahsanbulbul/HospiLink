@@ -106,7 +106,10 @@ You can try out the application here: https://hospilink.onrender.com
 2. Create a virtual environment and activate it:
    ```bash
    python -m venv django_venv
-   source django_venv/bin/activate  # On Windows: django_venv\Scripts\activate
+   # On UNIX:
+   source django_venv/bin/activate  
+   # On Windows: 
+   django_venv\Scripts\activate
    ```
 3. Install dependencies:
    ```bash
@@ -114,16 +117,13 @@ You can try out the application here: https://hospilink.onrender.com
    ```
 4. Set up PostgreSQL:
 
-    - Create a database
-    - Import the schema from ```backup_file.sql```
-    - Configure database settings in ```.env```
-
-    - env file structure:
-      ```bash
-      POSTGRES_DB=DB name here
-      POSTGRES_USER=your username here
-      POSTGRES_PASSWORD=your password here
-      ```
+    - Configure the ```postgres/.env.example``` file and rename it to ```postgres/.env```
+    - Create a database container with credentials provided in ```postgres/.env```
+    ```bash
+    docker compose -f postgres/compose.yaml up -d
+    ```
+    - Import the schema from ```backup_file.sql``` to the db instance
+    - Populate database credentials in ```django_project/.env```. It is used for database to django communication. ```django_project/.env.example``` is given as reference
     
 5. Run the application
    ```bash
